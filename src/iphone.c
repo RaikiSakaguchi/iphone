@@ -102,7 +102,7 @@ int main(int argc, char const *argv[]) {
     return 1;
   }
 
-  FILE *rec_fp = popen("rec -t raw -r 44100 -b 16 -c 1 -e s -", "r");
+  FILE *rec_fp = popen("rec -t raw -r 44100 -b 16 -c 1 -e s - | sox -t raw -r 44100 -b 16 -c 1 -e s - -t raw - pitch 500", "r");
   FILE *play_fp = popen("play -t raw -r 44100 -b 16 -c 1 -e s -", "w");
   if (rec_fp == NULL || play_fp == NULL) {
     perror("popen");
