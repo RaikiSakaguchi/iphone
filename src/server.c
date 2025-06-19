@@ -2,10 +2,11 @@
 
 #include <arpa/inet.h>
 #include <stdio.h>
+#include <unistd.h>
 
 client_info accept_client(int port) {
   struct sockaddr_in addr;
-  struct sockaddr_in client_addr;
+  struct sockaddr_in client_addr = {0};
   client_info client;
   client.s = -1;
   client.addr = client_addr;
