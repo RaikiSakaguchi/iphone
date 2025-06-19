@@ -55,10 +55,10 @@ int main(int argc, char const *argv[]) {
     addr.sin_family = AF_INET;
     inet_aton(argv[1], &addr.sin_addr);
     addr.sin_port = htons(atoi(argv[2]));
-    if (connect(s, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-      perror("connect");
-      return 1;
-    }
+    // if (connect(s, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+    //   perror("connect");
+    //   return 1;
+    // }
 
     printf("Connected to server: %s:%d\n", argv[1], atoi(argv[2]));
   }
