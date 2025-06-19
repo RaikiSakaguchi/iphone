@@ -8,7 +8,71 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "client.h"
+#include "server.h"
+
 #define BUFSIZE 2048
+
+client_info accept_client(int port) {
+  struct sockaddr_in addr;
+  struct sockaddr_in client_addr;
+  client_info client;
+  client.s = -1;
+  client.addr = client_addr;
+  int ss = socket(PF_INET, SOCK_STREAM, 0);
+  if (ss < 0) {
+    perror("socket");
+    return client;
+  }
+
+  addr.sin_family = AF_INET;
+  addr.sin_port = htons(port);
+  addr.sin_addr.s_addr = INADDR_ANY;
+  if (bind(ss, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+    perror("bind");
+    close(ss);
+    return client;
+  }
+
+  if (listen(ss, 10) < 0) {
+    perror("listen");
+    close(ss);
+    return client;
+  }
+
+  socklen_t len = sizeof(struct sockaddr_in);
+  int s = accept(ss, (struct sockaddr *)&client_addr, &len);
+  if (s < 0) {
+    perror("accept");
+    close(ss);
+    return client;
+  }
+
+  close(ss);
+  client.s = s;
+  client.addr = client_addr;
+  return client;
+}
+
+int connect_to_server(const char *ip, int port) {
+  int s = socket(PF_INET, SOCK_STREAM, 0);
+  if (s < 0) {
+    perror("socket");
+    return -1;
+  }
+
+  struct sockaddr_in addr;
+  addr.sin_family = AF_INET;
+  inet_aton(ip, &addr.sin_addr);
+  addr.sin_port = htons(port);
+  if (connect(s, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+    perror("connect");
+    close(s);
+    return -1;
+  }
+
+  return s;
+}
 
 int main(int argc, char const *argv[]) {
   if (argc != 2 && argc != 3) {
@@ -23,40 +87,14 @@ int main(int argc, char const *argv[]) {
   // connection to server or client
   if (argc == 2) {
     // server mode
-    int ss = socket(PF_INET, SOCK_STREAM, 0);
+    client_info client = accept_client(atoi(argv[1]));
+    s = client.s;
 
-    struct sockaddr_in addr;
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(atoi(argv[1]));
-    addr.sin_addr.s_addr = INADDR_ANY;
-    bind(ss, (struct sockaddr *)&addr, sizeof(addr));
-
-    listen(ss, 10);
-
-    struct sockaddr_in client_addr;
-    socklen_t len = sizeof(struct sockaddr_in);
-    s = accept(ss, (struct sockaddr *)&client_addr, &len);
-    if (s < 0) {
-      perror("accept");
-      close(ss);
-      return 1;
-    }
-    close(ss);
-
-    printf("Connected to client: %s:%d\n", inet_ntoa(client_addr.sin_addr),
-           ntohs(client_addr.sin_port));
+    printf("Connected to client: %s:%d\n", inet_ntoa(client.addr.sin_addr),
+           ntohs(client.addr.sin_port));
   } else if (argc == 3) {
     // client mode
-    s = socket(PF_INET, SOCK_STREAM, 0);
-
-    struct sockaddr_in addr;
-    addr.sin_family = AF_INET;
-    inet_aton(argv[1], &addr.sin_addr);
-    addr.sin_port = htons(atoi(argv[2]));
-    if (connect(s, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-      perror("connect");
-      return 1;
-    }
+    s = connect_to_server(argv[1], atoi(argv[2]));
 
     printf("Connected to server: %s:%d\n", argv[1], atoi(argv[2]));
   } else {
