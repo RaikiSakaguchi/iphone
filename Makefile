@@ -7,10 +7,10 @@ OBJDIR = ./obj
 # LIBDIR = ./lib
 
 CFLAGS = -Wall -O2 -I$(INCDIR)
-LDFLAGS = 
+LDFLAGS = -lm
 
 SRCS = $(wildcard $(SRCDIR)/*.c)
-OBJS = $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SRCS))
+OBJS = $(patsubst $(SRCDIR)/%.c, $(OBJDIR)/%.o, $(SRCS))
 TARGET = $(BINDIR)/iphone
 
 .PHONY: all clean

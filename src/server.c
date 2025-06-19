@@ -31,6 +31,8 @@ client_info accept_client(int port) {
     return client;
   }
 
+  printf("Server is listening on port %d...\n", port);
+
   socklen_t len = sizeof(struct sockaddr_in);
   int s = accept(ss, (struct sockaddr *)&client_addr, &len);
   if (s < 0) {

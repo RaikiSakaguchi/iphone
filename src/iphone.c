@@ -9,19 +9,15 @@
 
 #include "client.h"
 #include "server.h"
+#include "validate.h"
 
 #define BUFSIZE 2048
 
 int main(int argc, char const *argv[]) {
-  if (argc != 2 && argc != 3) {
-    fprintf(stderr,
-            "Usage: %s <port> (for server) or %s <IP> <port> (for client)\n",
-            argv[0], argv[0]);
-    return 1;
-  }
+  if (!is_command_line_valid(argc, argv)) return 1;
 
   int s;
-  int is_server = (argc == 2);
+  int is_server = (argc == 3);
 
   // connection to server or client
   if (is_server) {
@@ -30,7 +26,7 @@ int main(int argc, char const *argv[]) {
     s = client.s;
     printf("Connected to client: %s:%d\n", inet_ntoa(client.addr.sin_addr),
            ntohs(client.addr.sin_port));
-  } else if (argc == 3) {
+  } else {
     // client mode
     s = connect_to_server(argv[1], atoi(argv[2]));
     printf("Connected to server: %s:%d\n", argv[1], atoi(argv[2]));
