@@ -1,0 +1,1 @@
+int connect_to_server(const char *ip, int port);

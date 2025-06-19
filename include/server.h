@@ -5,4 +5,4 @@ typedef struct client {
   struct sockaddr_in addr;
 } client_info;
 
-
+client_info accept_client(int port);
