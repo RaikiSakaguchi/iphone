@@ -1,4 +1,5 @@
 #include <netinet/in.h>
+#include <stdio.h>
 
 typedef struct client {
   int s;

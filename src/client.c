@@ -1,4 +1,7 @@
+#include <arpa/inet.h>
 #include <netinet/in.h>
+#include <stdio.h>
+#include <unistd.h>
 
 int connect_to_server(const char *ip, int port) {
   int s = socket(PF_INET, SOCK_STREAM, 0);

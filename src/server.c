@@ -1,5 +1,8 @@
 #include "server.h"
 
+#include <arpa/inet.h>
+#include <stdio.h>
+
 client_info accept_client(int port) {
   struct sockaddr_in addr;
   struct sockaddr_in client_addr;
