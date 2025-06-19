@@ -19,13 +19,14 @@ int main(int argc, char const *argv[]) {
   }
 
   int s;
+  struct sockaddr_in addr;
 
   // connection to server or client
   if (argc == 2) {
     // server mode
-    int ss = socket(PF_INET, SOCK_STREAM, 0);
+    int ss = socket(PF_INET, SOCK_DGRAM, 0);
+    // int ss = socket(PF_INET, SOCK_STREAM, 0);
 
-    struct sockaddr_in addr;
     addr.sin_family = AF_INET;
     addr.sin_port = htons(atoi(argv[1]));
     addr.sin_addr.s_addr = INADDR_ANY;
@@ -33,9 +34,8 @@ int main(int argc, char const *argv[]) {
 
     listen(ss, 10);
 
-    struct sockaddr_in client_addr;
     socklen_t len = sizeof(struct sockaddr_in);
-    s = accept(ss, (struct sockaddr *)&client_addr, &len);
+    s = accept(ss, (struct sockaddr *)&addr, &len);
     if (s < 0) {
       perror("accept");
       close(ss);
@@ -43,13 +43,13 @@ int main(int argc, char const *argv[]) {
     }
     close(ss);
 
-    printf("Connected to client: %s:%d\n", inet_ntoa(client_addr.sin_addr),
-           ntohs(client_addr.sin_port));
+    printf("Connected to client: %s:%d\n", inet_ntoa(addr.sin_addr),
+           ntohs(addr.sin_port));
   } else if (argc == 3) {
     // client mode
-    s = socket(PF_INET, SOCK_STREAM, 0);
+    s = socket(PF_INET, SOCK_DGRAM, 0);
+    // s = socket(PF_INET, SOCK_STREAM, 0);
 
-    struct sockaddr_in addr;
     addr.sin_family = AF_INET;
     inet_aton(argv[1], &addr.sin_addr);
     addr.sin_port = htons(atoi(argv[2]));
@@ -86,7 +86,9 @@ int main(int argc, char const *argv[]) {
       pclose(play_fp);
       return 1;
     }
-    if (send(s, read_buf, read_n, 0) < 0) {
+    if (sendto(s, read_buf, read_n, 0, (struct sockaddr *)&addr, sizeof(addr)) <
+        0) {
+      // if (send(s, read_buf, read_n, 0) < 0) {
       perror("send");
       close(s);
       pclose(rec_fp);
@@ -95,7 +97,8 @@ int main(int argc, char const *argv[]) {
     }
 
     // then receive and write data
-    write_n = recv(s, write_buf, BUFSIZE, 0);
+    write_n = recvfrom(s, write_buf, BUFSIZE, 0, NULL, NULL);
+    // write_n = recv(s, write_buf, BUFSIZE, 0);
     if (write_n < 0) {
       perror("recv");
       close(s);
