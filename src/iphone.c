@@ -36,7 +36,10 @@ int main(int argc, char const *argv[]) {
     printf("Connected to server: %s:%d\n", argv[1], atoi(argv[2]));
   }
 
-  FILE *rec_fp = popen("rec -t raw -r 44100 -b 16 -c 1 -e s - | sox -t raw -r 44100 -b 16 -c 1 -e s - -t raw - pitch 500", "r");
+  FILE *rec_fp = popen(
+      "rec -t raw -r 44100 -b 16 -c 1 -e s - | sox -t raw -r 44100 -b 16 -c 1 "
+      "-e s - -t raw - pitch 500",
+      "r");
   FILE *play_fp = popen("play -t raw -r 44100 -b 16 -c 1 -e s -", "w");
   if (rec_fp == NULL || play_fp == NULL) {
     perror("popen");
@@ -53,29 +56,23 @@ int main(int argc, char const *argv[]) {
     read_n = fread(read_buf, 1, BUFSIZE, rec_fp);
     if (read_n < 0) {
       perror("fread");
-      close(s);
-      pclose(rec_fp);
-      pclose(play_fp);
-      return 1;
+      break;
     }
     if (send(s, read_buf, read_n, 0) < 0) {
       perror("send");
-      close(s);
-      pclose(rec_fp);
-      pclose(play_fp);
-      return 1;
+      break;
     }
 
     // then receive and write data
     write_n = recv(s, write_buf, BUFSIZE, 0);
     if (write_n < 0) {
       perror("recv");
-      close(s);
-      pclose(rec_fp);
-      pclose(play_fp);
-      return 1;
+      break;
     }
     fwrite(write_buf, 1, write_n, play_fp);
   }
+  close(s);
+  pclose(rec_fp);
+  pclose(play_fp);
   return 0;
 }
