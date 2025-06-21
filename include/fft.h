@@ -16,4 +16,7 @@ void ifft(complex double *y, complex double *x, long n);
 void sample_to_complex(sample_t *s, complex double *X, long n);
 void complex_to_sample(complex double *X, sample_t *s, long n);
 
+// FFTとIFFTを一括実行
+void fft_filter(sample_t *samples, long n);
+
 #endif /* FFT_H */
